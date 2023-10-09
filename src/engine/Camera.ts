@@ -6,6 +6,7 @@ import { GameEntity } from './GameEntity'
 export class Camera implements GameEntity {
   public instance!: THREE.PerspectiveCamera
   private controls!: OrbitControls
+  private isRotate: boolean = true
 
   constructor(private engine: Engine) {
     this.initCamera()
@@ -29,6 +30,10 @@ export class Camera implements GameEntity {
     this.controls.update()
   }
 
+  set rotate(isRotate: boolean) {
+    this.isRotate = isRotate
+  }
+
   resize() {
     this.instance.aspect = this.engine.sizes.aspectRatio
     this.instance.updateProjectionMatrix()
@@ -36,5 +41,8 @@ export class Camera implements GameEntity {
 
   update() {
     this.controls.update()
+    if (!this.isRotate) {
+      this.instance.rotation.set(0, 0, 0)
+    }
   }
 }

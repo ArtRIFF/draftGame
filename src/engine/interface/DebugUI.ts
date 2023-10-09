@@ -1,5 +1,6 @@
 import * as lilGui from 'lil-gui'
 import Stats from 'three/examples/jsm/libs/stats.module'
+import { toogleHelpers } from '../../signals/signals'
 
 let instance: DebugUI | null = null
 
@@ -23,6 +24,18 @@ export class DebugUI {
       this.gui.hide()
       this.stats.dom.style.display = 'none'
     }
+
+    const debugObject = {
+      helpers: false,
+    }
+
+    this.gui.add(debugObject, 'helpers').onChange(() => {
+      if (debugObject.helpers) {
+        toogleHelpers.emit('onShowHelpers')
+      } else {
+        toogleHelpers.emit('onHideHelpers')
+      }
+    })
 
     window.addEventListener('keydown', (event) => {
       if (event.key === 'h') {
