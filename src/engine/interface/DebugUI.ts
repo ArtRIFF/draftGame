@@ -5,34 +5,32 @@ import { toogleHelpers } from '../../signals/signals'
 let instance: DebugUI | null = null
 
 export class DebugUI {
-  gui!: lilGui.GUI
-  stats!: Stats
+  private gui!: lilGui.GUI
+  private stats!: Stats
+  private debugObject = {
+    helpers: false,
+  }
 
-  constructor() {
+  constructor(private name: string) {
     if (instance) {
       return this
     }
 
     instance = this
 
-    this.stats = new Stats()
-    document.body.appendChild(this.stats.dom)
-
-    this.gui = new lilGui.GUI()
+    this.init()
 
     if (!window.location.search.includes('debug')) {
       this.gui.hide()
       this.stats.dom.style.display = 'none'
     }
 
-    const debugObject = {
-      helpers: false,
-    }
-
-    this.gui.add(debugObject, 'helpers').onChange(() => {
-      if (debugObject.helpers) {
+    this.gui.add(this.debugObject, 'helpers').onChange(() => {
+      if (this.debugObject.helpers) {
+        localStorage.setItem('isHelpersVisible', 'true')
         toogleHelpers.emit('onShowHelpers')
       } else {
+        localStorage.setItem('isHelpersVisible', 'false')
         toogleHelpers.emit('onHideHelpers')
       }
     })
@@ -48,6 +46,12 @@ export class DebugUI {
         }
       }
     })
+  }
+
+  private init() {
+    this.stats = new Stats()
+    document.body.appendChild(this.stats.dom)
+    this.gui = new lilGui.GUI()
   }
 
   update() {

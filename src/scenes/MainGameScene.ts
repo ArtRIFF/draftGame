@@ -3,24 +3,33 @@ import { Engine } from '../engine/Engine'
 import * as THREE from 'three'
 import { Resource } from '../engine/Resources'
 import { Box } from '../demo/Box'
-import { Object3D, Vector3 } from 'three'
+import { AnimationMixer, Object3D, Vector3 } from 'three'
 import { toogleHelpers } from '../signals/signals'
 import { Obstacle } from '../controls/Obstacle'
 import * as CANNON from 'cannon-es'
-import CannonDebugger from 'cannon-es-debugger'
 
 export class MainGameScene implements Experience {
-  resources: Resource[] = []
+  resources: Resource[] = [
+    {
+      name: 'BrainMan',
+      type: 'gltf',
+      path: '../../assets/BrainMan.glb',
+    },
+    {
+      name: 'Brain',
+      type: 'gltf',
+      path: '../../assets/Brain.glb',
+    },
+  ]
   private unit: Box = new Box()
   private obstacle: Obstacle = new Obstacle()
   private animationStep = 0.5
   private unitVector: Vector3 = new Vector3()
   private gridHelper: Object3D = new THREE.GridHelper(100, 50)
-  private lightHelper: Object3D
+  private lightHelper!: Object3D
   private axes: Object3D = new THREE.AxesHelper(100)
-  private world: CANNON.World
-  private gravityDebugger: CannonDebugger
-  private timeStep: number = 1 / 60
+  private brainMan!: any
+  private mixer!: AnimationMixer
 
   constructor(private engine: Engine) {
     toogleHelpers.on('onShowHelpers', () => this.showHelpers())
@@ -28,8 +37,7 @@ export class MainGameScene implements Experience {
   }
 
   init() {
-    this.addGravity()
-    this.engine.camera.rotate = false
+    this.engine.camera.rotate = true
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(10, 100),
       new THREE.MeshStandardMaterial({ color: 0x4fa014 })
@@ -47,7 +55,6 @@ export class MainGameScene implements Experience {
     let cubeBody = new CANNON.Body({ mass: 1, shape: new CANNON.Sphere(10) })
     cubeBody.addShape(cubeShape)
     cubeBody.position.set(0, 1, 5)
-    this.world.addBody(cubeBody)
     this.lightHelper = new THREE.DirectionalLightHelper(directionalLight)
     this.engine.scene.add(directionalLight, this.gridHelper, this.obstacle)
     this.unit.add(this.lightHelper, this.axes)
@@ -59,6 +66,16 @@ export class MainGameScene implements Experience {
     window.addEventListener('keydown', (e) => {
       this.onChangePosition(e.key)
     })
+
+    this.brainMan = this.engine.resources.getItem('BrainMan')
+    console.log(typeof this.brainMan)
+    console.log(this.brainMan)
+    this.brainMan.scene.position.set(2, 0, 20)
+    this.brainMan.scene.rotation.y = Math.PI
+    this.engine.scene.add(this.brainMan.scene)
+    this.engine.camera.instance.position.set(5, 10, 30)
+    this.mixer = new THREE.AnimationMixer(this.brainMan.scene)
+    this.mixer.clipAction(this.brainMan.animations[2]).play()
   }
 
   resize() {}
@@ -76,19 +93,14 @@ export class MainGameScene implements Experience {
   }
 
   update(delta: number) {
-    this.world.step(this.timeStep)
-    this.gravityDebugger.update()
+    this.mixer.update(delta)
     this.unit.position.z += this.unitVector.z
     this.unit.position.x += this.unitVector.x
     this.unitVector.multiplyScalar(0.8)
     this.updateCamera()
   }
 
-  updateCamera() {
-    this.engine.camera.instance.position.z = this.unit.position.z + 10
-    this.engine.camera.instance.position.y = this.unit.position.y + 5
-    this.engine.camera.instance.position.x = this.unit.position.x + 2
-  }
+  updateCamera() {}
 
   onChangePosition(key: string) {
     if (key === 'w') {
@@ -103,24 +115,5 @@ export class MainGameScene implements Experience {
     if (key === 'a') {
       this.unitVector.x -= this.animationStep
     }
-  }
-
-  addGravity() {
-    this.world = new CANNON.World()
-    this.world.gravity.set(0, -9.8, 0)
-    this.initGravityDebugger()
-  }
-
-  initGravityDebugger() {
-    this.gravityDebugger = new CannonDebugger(this.engine.scene, this.world, {
-      onInit(body, mesh) {
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'f') {
-            console.log('HI')
-            mesh.visible = !mesh.visible
-          }
-        })
-      },
-    })
   }
 }
