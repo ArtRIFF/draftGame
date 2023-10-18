@@ -11,7 +11,7 @@ export class DebugUI {
     helpers: false,
   }
 
-  constructor(private name: string) {
+  constructor() {
     if (instance) {
       return this
     }
