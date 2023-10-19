@@ -28,9 +28,11 @@ export class DebugUI {
     this.gui.add(this.debugObject, 'helpers').onChange(() => {
       if (this.debugObject.helpers) {
         localStorage.setItem('isHelpersVisible', 'true')
+        this.debugObject.helpers = true
         toogleHelpers.emit('onShowHelpers')
       } else {
         localStorage.setItem('isHelpersVisible', 'false')
+        this.debugObject.helpers = false
         toogleHelpers.emit('onHideHelpers')
       }
     })
@@ -52,6 +54,9 @@ export class DebugUI {
     this.stats = new Stats()
     document.body.appendChild(this.stats.dom)
     this.gui = new lilGui.GUI()
+    if (localStorage.getItem('isHelpersVisible') === 'true') {
+      this.debugObject.helpers = true
+    }
   }
 
   update() {

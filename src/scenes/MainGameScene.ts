@@ -68,14 +68,15 @@ export class MainGameScene implements Experience {
     })
 
     this.brainMan = this.engine.resources.getItem('BrainMan')
-    console.log(typeof this.brainMan)
-    console.log(this.brainMan)
     this.brainMan.scene.position.set(2, 0, 20)
     this.brainMan.scene.rotation.y = Math.PI
     this.engine.scene.add(this.brainMan.scene)
     this.engine.camera.instance.position.set(5, 10, 30)
     this.mixer = new THREE.AnimationMixer(this.brainMan.scene)
     this.mixer.clipAction(this.brainMan.animations[2]).play()
+    if (localStorage.getItem('isHelpersVisible') === 'true') {
+      this.showHelpers()
+    }
   }
 
   resize() {}
