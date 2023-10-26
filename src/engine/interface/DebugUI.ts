@@ -1,6 +1,6 @@
 import * as lilGui from 'lil-gui'
 import Stats from 'three/examples/jsm/libs/stats.module'
-import { toogleHelpers } from '../../signals/signals'
+import { emitUnitAction, toogleHelpers } from '../../signals/signals'
 
 let instance: DebugUI | null = null
 
@@ -25,18 +25,6 @@ export class DebugUI {
       this.stats.dom.style.display = 'none'
     }
 
-    this.gui.add(this.debugObject, 'helpers').onChange(() => {
-      if (this.debugObject.helpers) {
-        localStorage.setItem('isHelpersVisible', 'true')
-        this.debugObject.helpers = true
-        toogleHelpers.emit('onShowHelpers')
-      } else {
-        localStorage.setItem('isHelpersVisible', 'false')
-        this.debugObject.helpers = false
-        toogleHelpers.emit('onHideHelpers')
-      }
-    })
-
     window.addEventListener('keydown', (event) => {
       if (event.key === 'h') {
         if (this.gui._hidden) {
@@ -57,6 +45,67 @@ export class DebugUI {
     if (localStorage.getItem('isHelpersVisible') === 'true') {
       this.debugObject.helpers = true
     }
+    this.addHelpersUI()
+    this.addUnitUI()
+  }
+
+  private addHelpersUI() {
+    this.gui.add(this.debugObject, 'helpers').onChange(() => {
+      if (this.debugObject.helpers) {
+        localStorage.setItem('isHelpersVisible', 'true')
+        this.debugObject.helpers = true
+        toogleHelpers.emit('onShowHelpers')
+      } else {
+        localStorage.setItem('isHelpersVisible', 'false')
+        this.debugObject.helpers = false
+        toogleHelpers.emit('onHideHelpers')
+      }
+    })
+  }
+
+  private addUnitUI() {
+    const unitFolder = this.gui.addFolder('Unit')
+    unitFolder.add(
+      {
+        run: () => {
+          emitUnitAction.emit('onUnitRun')
+        },
+      },
+      'run'
+    )
+    unitFolder.add(
+      {
+        stop: () => {
+          emitUnitAction.emit('onUnitStop')
+        },
+      },
+      'stop'
+    )
+    unitFolder.add(
+      {
+        hit: () => {
+          emitUnitAction.emit('onUnitHit')
+        },
+      },
+      'hit'
+    )
+    unitFolder.add(
+      {
+        win: () => {
+          emitUnitAction.emit('onUnitWin')
+        },
+      },
+      'win'
+    )
+    unitFolder.add(
+      {
+        fall: () => {
+          emitUnitAction.emit('onUnitFall')
+        },
+      },
+      'fall'
+    )
+    unitFolder.close()
   }
 
   update() {
