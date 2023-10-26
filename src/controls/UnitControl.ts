@@ -1,30 +1,22 @@
-import {
-  AnimationAction,
-  AnimationClip,
-  AnimationMixer,
-  LoopOnce,
-  Scene,
-} from 'three'
+import { AnimationAction, AnimationClip, AnimationMixer, LoopOnce } from 'three'
+import { ModelControl } from './ModelControl'
 
-export class UnitControl {
+export class UnitControl extends ModelControl {
   private animationMixer: AnimationMixer
   private mainActiveAnimation!: AnimationAction
   private animations: AnimationAction[] = []
 
-  constructor(private unitModel: any) {
-    this.animationMixer = new AnimationMixer(unitModel.scene)
+  constructor(model: any) {
+    super(model)
+    this.animationMixer = new AnimationMixer(this.model.scene)
     this.addAnimationActions()
     this.activateAllActions()
   }
 
   private addAnimationActions() {
-    this.unitModel.animations.map((animationClip: AnimationClip) => {
+    this.model.animations.map((animationClip: AnimationClip) => {
       this.animations.push(this.animationMixer.clipAction(animationClip))
     })
-  }
-
-  setPosition(x: number, y: number, z: number) {
-    this.unitModel.scene.position.set(x, y, z)
   }
 
   run() {
@@ -103,14 +95,6 @@ export class UnitControl {
       action.play()
     }
     this.mainActiveAnimation = action
-  }
-
-  addToScene(scene: Scene) {
-    scene.add(this.unitModel.scene)
-  }
-
-  set rotationY(angle: number) {
-    this.unitModel.scene.rotation.y = angle
   }
 
   update(delta: number) {
