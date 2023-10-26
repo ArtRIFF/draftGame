@@ -2,9 +2,10 @@ import { Experience } from '../engine/Experience'
 import { Engine } from '../engine/Engine'
 import * as THREE from 'three'
 import { Resource } from '../engine/Resources'
-import { AnimationMixer, Object3D } from 'three'
-import { toogleHelpers } from '../signals/signals'
+import { Object3D } from 'three'
+import { emitUnitAction, toogleHelpers } from '../signals/signals'
 import { Obstacle } from '../controls/Obstacle'
+import { UnitControl } from '../controls/UnitControl'
 
 export class MainGameScene implements Experience {
   resources: Resource[] = [
@@ -23,12 +24,16 @@ export class MainGameScene implements Experience {
   private gridHelper: Object3D = new THREE.GridHelper(100, 50)
   private lightHelper!: Object3D
   private axes: Object3D = new THREE.AxesHelper(100)
-  private brainMan!: any
-  private mixer!: AnimationMixer
+  private unit!: UnitControl
 
   constructor(private engine: Engine) {
     toogleHelpers.on('onShowHelpers', () => this.showHelpers())
     toogleHelpers.on('onHideHelpers', () => this.hideHelpers())
+    emitUnitAction.on('onUnitRun', () => this.unit.run())
+    emitUnitAction.on('onUnitStop', () => this.unit.stop())
+    emitUnitAction.on('onUnitHit', () => this.unit.hit())
+    emitUnitAction.on('onUnitWin', () => this.unit.win())
+    emitUnitAction.on('onUnitFall', () => this.unit.fall())
   }
 
   init() {
@@ -50,13 +55,12 @@ export class MainGameScene implements Experience {
     this.engine.scene.add(directionalLight, this.gridHelper, this.obstacle)
     this.hideHelpers()
 
-    this.brainMan = this.engine.resources.getItem('BrainMan')
-    this.brainMan.scene.position.set(2, 0, 20)
-    this.brainMan.scene.rotation.y = Math.PI
-    this.engine.scene.add(this.brainMan.scene)
+    const brainManModel = this.engine.resources.getItem('BrainMan')
+    this.unit = new UnitControl(brainManModel)
+    this.unit.setPosition(0, 0, 20)
+    this.unit.rotationY = Math.PI
+    this.unit.addToScene(this.engine.scene)
     this.engine.camera.instance.position.set(5, 10, 30)
-    this.mixer = new THREE.AnimationMixer(this.brainMan.scene)
-    this.mixer.clipAction(this.brainMan.animations[2]).play()
     if (localStorage.getItem('isHelpersVisible') === 'true') {
       this.showHelpers()
     }
@@ -77,7 +81,7 @@ export class MainGameScene implements Experience {
   }
 
   update(delta: number) {
-    this.mixer.update(delta)
+    this.unit.update(delta)
     this.updateCamera()
   }
 
