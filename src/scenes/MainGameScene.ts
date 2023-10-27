@@ -47,6 +47,7 @@ export class MainGameScene implements Experience {
 
   init() {
     this.setCamera()
+    this.setBackground()
     this.obstacle.position.set(0, 1.1, 5)
     this.obstacle.receiveShadow = true
     this.obstacle.castShadow = true
@@ -69,10 +70,12 @@ export class MainGameScene implements Experience {
   }
 
   resize() {}
+
   private setCamera() {
     this.engine.camera.rotate = true
     this.engine.camera.instance.position.set(0, 10, 30)
   }
+
   private setLight() {
     this.engine.scene.add(new THREE.AmbientLight(0xffffff, 0.1))
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -130,4 +133,9 @@ export class MainGameScene implements Experience {
   }
 
   updateCamera() {}
+
+  private setBackground() {
+    this.engine.scene.background = new THREE.Color(0xa0a0a0)
+    this.engine.scene.fog = new THREE.Fog(0xa0a0a0, 20, 70)
+  }
 }
