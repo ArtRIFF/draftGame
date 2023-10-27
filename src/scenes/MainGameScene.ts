@@ -28,7 +28,9 @@ export class MainGameScene implements Experience {
   ]
   private obstacle: Obstacle = new Obstacle()
   private gridHelper: Object3D = new THREE.GridHelper(100, 50)
-  private lightHelper!: Object3D
+  private directLightHelper!: Object3D
+  private hemisphereLightHelper!: Object3D
+  private pointLightHelper!: Object3D
   private axes: Object3D = new THREE.AxesHelper(100)
   private unit!: UnitControl
   private trackFloor!: ModelControl
@@ -44,43 +46,82 @@ export class MainGameScene implements Experience {
   }
 
   init() {
-    this.engine.camera.rotate = true
-    this.engine.scene.add(new THREE.AmbientLight(0xcfe518, 0.5))
-    let directionalLight = new THREE.DirectionalLight(0x1882e5, 1)
-    directionalLight.castShadow = true
-    directionalLight.position.set(2, 2, 2)
+    this.setCamera()
     this.obstacle.position.set(0, 1.1, 5)
-    this.lightHelper = new THREE.DirectionalLightHelper(directionalLight)
-    this.engine.scene.add(directionalLight, this.gridHelper, this.obstacle)
-    this.hideHelpers()
+    this.obstacle.receiveShadow = true
+    this.obstacle.castShadow = true
+    this.engine.scene.add(this.obstacle)
     const trackFloorModel = this.engine.resources.getItem('TrackFloor')
-    const brainManModel = this.engine.resources.getItem('BrainMan')
     this.trackFloor = new ModelControl(trackFloorModel)
     this.trackFloor.addToScene(this.engine.scene)
     this.trackFloor.setPosition(0, 0, 30)
     this.trackFloor.setScale(1, 1, 3)
+    const brainManModel = this.engine.resources.getItem('BrainMan')
     this.unit = new UnitControl(brainManModel)
     this.unit.setPosition(0, 0.1, 20)
     this.unit.setRotation(0, Math.PI, 0)
     this.unit.addToScene(this.engine.scene)
-    this.engine.camera.instance.position.set(5, 10, 30)
+    this.setLight()
+    this.hideHelpers()
     if (localStorage.getItem('isHelpersVisible') === 'true') {
       this.showHelpers()
     }
   }
 
   resize() {}
+  private setCamera() {
+    this.engine.camera.rotate = true
+    this.engine.camera.instance.position.set(0, 10, 30)
+  }
+  private setLight() {
+    this.engine.scene.add(new THREE.AmbientLight(0xffffff, 0.1))
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight.position.set(15, 30, -40)
+    directionalLight.castShadow = true
+    directionalLight.shadow.mapSize.width = 3072
+    directionalLight.shadow.mapSize.height = 3072
+    directionalLight.shadow.camera.near = 1.5
+    directionalLight.shadow.camera.far = 500
+    directionalLight.shadow.camera.left = -80
+    directionalLight.shadow.camera.right = 80
+    directionalLight.shadow.camera.top = 80
+    directionalLight.shadow.camera.bottom = -80
+    const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1)
+    hemisphereLight.position.set(0, 10, 0)
+    const pointLight = new THREE.PointLight(0xe6e229, 10, 0)
+    pointLight.position.set(0, 6, 19.5)
+
+    this.hemisphereLightHelper = new THREE.HemisphereLightHelper(
+      hemisphereLight,
+      2
+    )
+    this.directLightHelper = new THREE.DirectionalLightHelper(directionalLight)
+    this.pointLightHelper = new THREE.PointLightHelper(pointLight)
+
+    this.engine.scene.add(directionalLight, hemisphereLight, pointLight)
+
+    this.engine.scene.add(
+      this.hemisphereLightHelper,
+      this.directLightHelper,
+      this.pointLightHelper,
+      this.gridHelper
+    )
+  }
 
   hideHelpers() {
     this.axes.visible = false
     this.gridHelper.visible = false
-    this.lightHelper.visible = false
+    this.directLightHelper.visible = false
+    this.hemisphereLightHelper.visible = false
+    this.pointLightHelper.visible = false
   }
 
   showHelpers() {
     this.axes.visible = true
     this.gridHelper.visible = true
-    this.lightHelper.visible = true
+    this.directLightHelper.visible = true
+    this.hemisphereLightHelper.visible = true
+    this.pointLightHelper.visible = true
   }
 
   update(delta: number) {

@@ -1,7 +1,14 @@
-import { Scene } from 'three'
+import { Mesh, Scene } from 'three'
 
 export class ModelControl {
-  constructor(protected model: any) {}
+  constructor(protected model: any) {
+    this.model.scene.traverse((object: any) => {
+      if (object instanceof Mesh) {
+        object.castShadow = true
+        object.receiveShadow = true
+      }
+    })
+  }
 
   addToScene(scene: Scene) {
     scene.add(this.model.scene)
