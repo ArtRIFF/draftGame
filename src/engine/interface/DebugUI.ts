@@ -105,6 +105,22 @@ export class DebugUI {
       },
       'fall'
     )
+    unitFolder.add(
+      {
+        moveLeft: () => {
+          emitUnitAction.emit('onUnitMoveLeft')
+        },
+      },
+      'moveLeft'
+    )
+    unitFolder.add(
+      {
+        moveRight: () => {
+          emitUnitAction.emit('onUnitMoveRight')
+        },
+      },
+      'moveRight'
+    )
     unitFolder.close()
   }
 

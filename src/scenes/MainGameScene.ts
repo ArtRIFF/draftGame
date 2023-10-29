@@ -43,25 +43,21 @@ export class MainGameScene implements Experience {
     emitUnitAction.on('onUnitHit', () => this.unit.hit())
     emitUnitAction.on('onUnitWin', () => this.unit.win())
     emitUnitAction.on('onUnitFall', () => this.unit.fall())
+    emitUnitAction.on('onUnitMoveLeft', () => this.unit.moveLeft())
+    emitUnitAction.on('onUnitMoveRight', () => this.unit.moveRight())
   }
 
   init() {
     this.setCamera()
     this.setBackground()
-    this.obstacle.position.set(0, 1.1, 5)
+    this.addTrackFloor()
+    this.addUnit()
+
+    this.obstacle.position.set(3, 1.1, 5)
     this.obstacle.receiveShadow = true
     this.obstacle.castShadow = true
     this.engine.scene.add(this.obstacle)
-    const trackFloorModel = this.engine.resources.getItem('TrackFloor')
-    this.trackFloor = new ModelControl(trackFloorModel)
-    this.trackFloor.addToScene(this.engine.scene)
-    this.trackFloor.setPosition(0, 0, 30)
-    this.trackFloor.setScale(1, 1, 3)
-    const brainManModel = this.engine.resources.getItem('BrainMan')
-    this.unit = new UnitControl(brainManModel)
-    this.unit.setPosition(0, 0.1, 20)
-    this.unit.setRotation(0, Math.PI, 0)
-    this.unit.addToScene(this.engine.scene)
+
     this.setLight()
     this.hideHelpers()
     if (localStorage.getItem('isHelpersVisible') === 'true') {
@@ -137,5 +133,22 @@ export class MainGameScene implements Experience {
   private setBackground() {
     this.engine.scene.background = new THREE.Color(0xa0a0a0)
     this.engine.scene.fog = new THREE.Fog(0xa0a0a0, 20, 70)
+  }
+
+  private addTrackFloor() {
+    const trackFloorModel = this.engine.resources.getItem('TrackFloor')
+    this.trackFloor = new ModelControl(trackFloorModel)
+    this.trackFloor.addToScene(this.engine.scene)
+    this.trackFloor.setPosition(0, 0, 30)
+    this.trackFloor.setScale(1, 1, 3)
+  }
+
+  private addUnit() {
+    const brainManModel = this.engine.resources.getItem('BrainMan')
+    this.unit = new UnitControl(brainManModel)
+    this.unit.setPosition(0, 0.1, 20)
+    this.unit.setRotation(0, Math.PI, 0)
+    this.unit.addToScene(this.engine.scene)
+    this.unit.step = +this.trackFloor.objectSize.width.toFixed(0) / 3
   }
 }
