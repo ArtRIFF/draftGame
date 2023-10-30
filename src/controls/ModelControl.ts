@@ -27,6 +27,4 @@ export class ModelControl {
     this.model.scene.rotation.y = y
     this.model.scene.rotation.z = z
   }
-
-  update(delta: number) {}
 }
