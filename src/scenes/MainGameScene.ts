@@ -38,6 +38,9 @@ export class MainGameScene implements Experience {
   constructor(private engine: Engine) {
     toogleHelpers.on('onShowHelpers', () => this.showHelpers())
     toogleHelpers.on('onHideHelpers', () => this.hideHelpers())
+    toogleHelpers.on('onSwitchCameraRotation', (switchValue: boolean) =>
+      this.onSwitchRotationCamera(switchValue)
+    )
     emitUnitAction.on('onUnitRun', () => this.unit.run())
     emitUnitAction.on('onUnitStop', () => this.unit.stop())
     emitUnitAction.on('onUnitHit', () => this.unit.hit())
@@ -63,13 +66,21 @@ export class MainGameScene implements Experience {
     if (localStorage.getItem('isHelpersVisible') === 'true') {
       this.showHelpers()
     }
+    if (localStorage.getItem('isEnableCameraRotation') === 'true') {
+      this.engine.camera.enableOrbitRotation = true
+    }
   }
 
   resize() {}
 
   private setCamera() {
-    this.engine.camera.rotate = true
+    this.engine.camera.enableOrbitRotation = false
     this.engine.camera.instance.position.set(0, 10, 30)
+  }
+
+  private onSwitchRotationCamera(switchValue: boolean) {
+    console.log(switchValue)
+    this.engine.camera.enableOrbitRotation = switchValue
   }
 
   private setLight() {
