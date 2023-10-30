@@ -1,10 +1,13 @@
+;``
 import { AnimationAction, AnimationClip, AnimationMixer, LoopOnce } from 'three'
 import { ModelControl } from './ModelControl'
+import gsap from 'gsap'
 
 export class UnitControl extends ModelControl {
   private animationMixer: AnimationMixer
   private mainActiveAnimation!: AnimationAction
   private animations: AnimationAction[] = []
+  private _step: number = 1
 
   constructor(model: any) {
     super(model)
@@ -100,4 +103,34 @@ export class UnitControl extends ModelControl {
   update(delta: number) {
     this.animationMixer.update(delta)
   }
+
+  set step(stepValue: number) {
+    this._step = stepValue
+  }
+
+  moveLeft() {
+    this.horizonMove('left')
+  }
+
+  moveRight() {
+    this.horizonMove('right')
+  }
+
+  private horizonMove(direction: 'left' | 'right') {
+    const directionValue: number = direction === 'left' ? 1 : -1
+    const currentPositionX = this.model.scene.position.x
+    const destinationX =
+      currentPositionX === directionValue * this._step
+        ? 0
+        : directionValue * -this._step
+    gsap
+      .to(this.model.scene.position, {
+        x: destinationX,
+        duration: 1,
+        ease: 'power1.inOut',
+      })
+      .play()
+  }
 }
+
+;``
