@@ -7,6 +7,7 @@ import { emitUnitAction, toogleHelpers } from '../signals/signals'
 import { Obstacle } from '../controls/Obstacle'
 import { UnitControl } from '../controls/UnitControl'
 import { ModelControl } from '../controls/ModelControl'
+import { SwipeManager } from '../managers/SwipeManager'
 
 export class MainGameScene implements Experience {
   resources: Resource[] = [
@@ -34,6 +35,7 @@ export class MainGameScene implements Experience {
   private axes: Object3D = new THREE.AxesHelper(100)
   private unit!: UnitControl
   private trackFloor!: ModelControl
+  private swipeManager: SwipeManager = new SwipeManager()
 
   constructor(private engine: Engine) {
     toogleHelpers.on('onShowHelpers', () => this.showHelpers())
@@ -79,7 +81,6 @@ export class MainGameScene implements Experience {
   }
 
   private onSwitchRotationCamera(switchValue: boolean) {
-    console.log(switchValue)
     this.engine.camera.enableOrbitRotation = switchValue
   }
 
@@ -161,5 +162,7 @@ export class MainGameScene implements Experience {
     this.unit.setRotation(0, Math.PI, 0)
     this.unit.addToScene(this.engine.scene)
     this.unit.step = +this.trackFloor.objectSize.width.toFixed(0) / 3
+    this.swipeManager.subscribeOnLeftSwipe(this.unit.moveLeft, this.unit)
+    this.swipeManager.subscribeOnRightSwipe(this.unit.moveRight, this.unit)
   }
 }
