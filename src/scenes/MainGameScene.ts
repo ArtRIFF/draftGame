@@ -162,7 +162,20 @@ export class MainGameScene implements Experience {
     this.unit.setRotation(0, Math.PI, 0)
     this.unit.addToScene(this.engine.scene)
     this.unit.step = +this.trackFloor.objectSize.width.toFixed(0) / 3
-    this.swipeManager.subscribeOnLeftSwipe(this.unit.moveLeft, this.unit)
-    this.swipeManager.subscribeOnRightSwipe(this.unit.moveRight, this.unit)
+    this.swipeManager.subscribeOnLeftSwipe(() => {
+      this.unit.moveLeft().then(() => {
+        this.unit.run()
+      })
+    })
+    this.swipeManager.subscribeOnRightSwipe(() => {
+      this.unit.moveRight().then(() => {
+        this.unit.run()
+      })
+    })
+    this.swipeManager.subscribeOnTopSwipe(() => {
+      this.unit.hit().then(() => {
+        this.unit.run()
+      })
+    })
   }
 }

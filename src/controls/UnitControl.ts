@@ -1,4 +1,4 @@
-;``
+import promiseHelper, { ResolvablePromise } from '../helpers/ResolvablePromise'
 import { AnimationAction, AnimationClip, AnimationMixer, LoopOnce } from 'three'
 import { ModelControl } from './ModelControl'
 import gsap from 'gsap'
@@ -8,12 +8,16 @@ export class UnitControl extends ModelControl {
   private mainActiveAnimation!: AnimationAction
   private animations: AnimationAction[] = []
   private _step: number = 1
+  private finishCurrentActionPromise!: ResolvablePromise<void>
 
   constructor(model: any) {
     super(model)
     this.animationMixer = new AnimationMixer(this.model.scene)
     this.addAnimationActions()
     this.activateAllActions()
+    this.animationMixer.addEventListener('finished', () => {
+      this.finishCurrentActionPromise.resolve()
+    })
   }
 
   private addAnimationActions() {
@@ -22,35 +26,48 @@ export class UnitControl extends ModelControl {
     })
   }
 
-  run() {
-    this.startAction('Run', true)
+  async run() {
+    await this.startAction('Run', true)
   }
 
-  stop() {
-    this.startAction('Idle', true)
+  async stop() {
+    await this.startAction('Idle', true)
   }
 
-  hit() {
-    this.startAction('Header', false)
+  async hit() {
+    await this.startAction('Header', false)
   }
 
-  win() {
-    this.startAction('Victory', true)
+  async win() {
+    await this.startAction('Victory', true)
   }
 
-  fall() {
-    this.startAction('Death', false)
+  async fall() {
+    await this.startAction('Death', false)
   }
 
-  private startAction(actionName: string, loop: boolean) {
+  async moveLeft() {
+    await this.horizonMove('left')
+  }
+
+  async moveRight() {
+    await this.horizonMove('right')
+  }
+
+  private async startAction(actionName: string, loop: boolean) {
     const runAction = this.getActionByName(actionName)
     const mainActiveClip = this.mainActiveAnimation.getClip()
     if (actionName !== mainActiveClip.name) {
+      if (this.finishCurrentActionPromise) {
+        await this.finishCurrentActionPromise.resolve()
+      }
       const option = {
         duration: 1,
         loop: loop,
       }
       this.executeCrossFade(runAction, option)
+      this.finishCurrentActionPromise = promiseHelper.getResolvablePromise()
+      await this.finishCurrentActionPromise
     }
   }
 
@@ -108,22 +125,14 @@ export class UnitControl extends ModelControl {
     this._step = stepValue
   }
 
-  moveLeft() {
-    this.horizonMove('left')
-  }
-
-  moveRight() {
-    this.horizonMove('right')
-  }
-
-  private horizonMove(direction: 'left' | 'right') {
+  private async horizonMove(direction: 'left' | 'right') {
     const directionValue: number = direction === 'left' ? 1 : -1
     const currentPositionX = this.model.scene.position.x
     const destinationX =
       currentPositionX === directionValue * this._step
         ? 0
         : directionValue * -this._step
-    gsap
+    await gsap
       .to(this.model.scene.position, {
         x: destinationX,
         duration: 1,
