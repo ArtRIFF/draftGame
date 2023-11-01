@@ -7,6 +7,7 @@ import { emitUnitAction, toogleHelpers } from '../signals/signals'
 import { Obstacle } from '../controls/Obstacle'
 import { UnitControl } from '../controls/UnitControl'
 import { ModelControl } from '../controls/ModelControl'
+import { SwipeManager } from '../managers/SwipeManager'
 
 export class MainGameScene implements Experience {
   resources: Resource[] = [
@@ -34,10 +35,14 @@ export class MainGameScene implements Experience {
   private axes: Object3D = new THREE.AxesHelper(100)
   private unit!: UnitControl
   private trackFloor!: ModelControl
+  private swipeManager: SwipeManager = new SwipeManager()
 
   constructor(private engine: Engine) {
     toogleHelpers.on('onShowHelpers', () => this.showHelpers())
     toogleHelpers.on('onHideHelpers', () => this.hideHelpers())
+    toogleHelpers.on('onSwitchCameraRotation', (switchValue: boolean) =>
+      this.onSwitchRotationCamera(switchValue)
+    )
     emitUnitAction.on('onUnitRun', () => this.unit.run())
     emitUnitAction.on('onUnitStop', () => this.unit.stop())
     emitUnitAction.on('onUnitHit', () => this.unit.hit())
@@ -63,13 +68,20 @@ export class MainGameScene implements Experience {
     if (localStorage.getItem('isHelpersVisible') === 'true') {
       this.showHelpers()
     }
+    if (localStorage.getItem('isEnableCameraRotation') === 'true') {
+      this.engine.camera.enableOrbitRotation = true
+    }
   }
 
   resize() {}
 
   private setCamera() {
-    this.engine.camera.rotate = true
+    this.engine.camera.enableOrbitRotation = false
     this.engine.camera.instance.position.set(0, 10, 30)
+  }
+
+  private onSwitchRotationCamera(switchValue: boolean) {
+    this.engine.camera.enableOrbitRotation = switchValue
   }
 
   private setLight() {
@@ -150,5 +162,20 @@ export class MainGameScene implements Experience {
     this.unit.setRotation(0, Math.PI, 0)
     this.unit.addToScene(this.engine.scene)
     this.unit.step = +this.trackFloor.objectSize.width.toFixed(0) / 3
+    this.swipeManager.subscribeOnLeftSwipe(() => {
+      this.unit.moveLeft().then(() => {
+        this.unit.run()
+      })
+    })
+    this.swipeManager.subscribeOnRightSwipe(() => {
+      this.unit.moveRight().then(() => {
+        this.unit.run()
+      })
+    })
+    this.swipeManager.subscribeOnTopSwipe(() => {
+      this.unit.hit().then(() => {
+        this.unit.run()
+      })
+    })
   }
 }

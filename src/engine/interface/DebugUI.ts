@@ -9,6 +9,7 @@ export class DebugUI {
   private stats!: Stats
   private debugObject = {
     helpers: false,
+    cameraRotation: false,
   }
 
   constructor() {
@@ -45,22 +46,48 @@ export class DebugUI {
     if (localStorage.getItem('isHelpersVisible') === 'true') {
       this.debugObject.helpers = true
     }
+    if (localStorage.getItem('isEnableCameraRotation') === 'true') {
+      this.debugObject.cameraRotation = true
+    }
     this.addHelpersUI()
     this.addUnitUI()
   }
 
   private addHelpersUI() {
-    this.gui.add(this.debugObject, 'helpers').onChange(() => {
-      if (this.debugObject.helpers) {
-        localStorage.setItem('isHelpersVisible', 'true')
-        this.debugObject.helpers = true
-        toogleHelpers.emit('onShowHelpers')
-      } else {
-        localStorage.setItem('isHelpersVisible', 'false')
-        this.debugObject.helpers = false
-        toogleHelpers.emit('onHideHelpers')
-      }
-    })
+    this.gui
+      .add(
+        {
+          helpers: this.debugObject.helpers,
+        },
+        'helpers'
+      )
+      .onChange(() => {
+        this.debugObject.helpers = !this.debugObject.helpers
+        if (this.debugObject.helpers) {
+          localStorage.setItem('isHelpersVisible', 'true')
+          toogleHelpers.emit('onShowHelpers')
+        } else {
+          localStorage.setItem('isHelpersVisible', 'false')
+          toogleHelpers.emit('onHideHelpers')
+        }
+      })
+    this.gui
+      .add(
+        {
+          cameraRotation: this.debugObject.cameraRotation,
+        },
+        'cameraRotation'
+      )
+      .onChange(() => {
+        this.debugObject.cameraRotation = !this.debugObject.cameraRotation
+        if (this.debugObject.cameraRotation) {
+          localStorage.setItem('isEnableCameraRotation', 'true')
+          toogleHelpers.emit('onSwitchCameraRotation', true)
+        } else {
+          localStorage.setItem('isEnableCameraRotation', 'false')
+          toogleHelpers.emit('onSwitchCameraRotation', false)
+        }
+      })
   }
 
   private addUnitUI() {
