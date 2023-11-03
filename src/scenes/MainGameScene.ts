@@ -4,10 +4,10 @@ import * as THREE from 'three'
 import { Resource } from '../engine/Resources'
 import { Object3D } from 'three'
 import { emitUnitAction, toogleHelpers } from '../signals/signals'
-import { Obstacle } from '../controls/Obstacle'
 import { UnitControl } from '../controls/UnitControl'
 import { ModelControl } from '../controls/ModelControl'
 import { SwipeManager } from '../managers/SwipeManager'
+import { MovingTrackManager } from '../managers/MovingTrackManager'
 
 export class MainGameScene implements Experience {
   resources: Resource[] = [
@@ -26,8 +26,12 @@ export class MainGameScene implements Experience {
       type: 'gltf',
       path: '../../assets/TrackFloor.glb',
     },
+    {
+      name: 'Obstacle',
+      type: 'gltf',
+      path: '../../assets/Obstacle.glb',
+    },
   ]
-  private obstacle: Obstacle = new Obstacle()
   private gridHelper: Object3D = new THREE.GridHelper(100, 50)
   private directLightHelper!: Object3D
   private hemisphereLightHelper!: Object3D
@@ -36,8 +40,10 @@ export class MainGameScene implements Experience {
   private unit!: UnitControl
   private trackFloor!: ModelControl
   private swipeManager: SwipeManager = new SwipeManager()
+  private movingTrackManager: MovingTrackManager
 
   constructor(private engine: Engine) {
+    this.movingTrackManager = new MovingTrackManager(this.engine)
     toogleHelpers.on('onShowHelpers', () => this.showHelpers())
     toogleHelpers.on('onHideHelpers', () => this.hideHelpers())
     toogleHelpers.on('onSwitchCameraRotation', (switchValue: boolean) =>
@@ -57,12 +63,12 @@ export class MainGameScene implements Experience {
     this.setBackground()
     this.addTrackFloor()
     this.addUnit()
-
-    this.obstacle.position.set(3, 1.1, 5)
-    this.obstacle.receiveShadow = true
-    this.obstacle.castShadow = true
-    this.engine.scene.add(this.obstacle)
-
+    const startPointZ = Math.floor(
+      this.trackFloor.z - this.trackFloor.objectSize.deep
+    )
+    const trackLength = Math.floor(this.trackFloor.objectSize.deep)
+    this.movingTrackManager.setTrackParameters(startPointZ, trackLength)
+    this.movingTrackManager.addTrackObjects()
     this.setLight()
     this.hideHelpers()
     if (localStorage.getItem('isHelpersVisible') === 'true') {
@@ -173,9 +179,13 @@ export class MainGameScene implements Experience {
       })
     })
     this.swipeManager.subscribeOnTopSwipe(() => {
-      this.unit.hit().then(() => {
-        this.unit.run()
+      this.unit.run().then(() => {
+        this.movingTrackManager.stopMoveTrack()
       })
+      this.movingTrackManager.startMoveTrack()
+    })
+    this.swipeManager.subscribeOnBottomSwipe(() => {
+      this.unit.stop()
     })
   }
 }
