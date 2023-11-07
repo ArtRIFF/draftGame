@@ -1,4 +1,4 @@
-import { Mesh, Scene } from 'three'
+import { Box3, Mesh, Scene } from 'three'
 
 export class ModelControl {
   constructor(protected model: any) {
@@ -18,6 +18,30 @@ export class ModelControl {
     this.model.scene.position.set(x, y, z)
   }
 
+  set x(value: number) {
+    this.model.scene.position.x = value
+  }
+
+  set y(value: number) {
+    this.model.scene.position.y = value
+  }
+
+  set z(value: number) {
+    this.model.scene.position.z = value
+  }
+
+  get x() {
+    return this.model.scene.position.x
+  }
+
+  get y() {
+    return this.model.scene.position.y
+  }
+
+  get z() {
+    return this.model.scene.position.z
+  }
+
   setScale(x: number, y: number, z: number) {
     this.model.scene.scale.set(x, y, z)
   }
@@ -29,31 +53,11 @@ export class ModelControl {
   }
 
   get objectSize(): { width: number; height: number; deep: number } {
-    return this.findGeometryParam(this.model.scene)
-  }
-
-  private findGeometryParam(objectParent: any): {
-    width: number
-    height: number
-    deep: number
-  } {
-    const childrenCount = objectParent.children.length
-    const objectChild = objectParent.children[0]
-    if (childrenCount === 0) {
-      return {
-        width: 0,
-        height: 0,
-        deep: 0,
-      }
-    } else if (!objectChild.hasOwnProperty('geometry')) {
-      return this.findGeometryParam(objectChild)
-    } else {
-      const box = objectChild.geometry.boundingBox
-      return {
-        width: box?.max.x - box?.min.x,
-        height: box?.max.y - box?.min.y,
-        deep: box?.max.z - box?.min.z,
-      }
+    const box = new Box3().setFromObject(this.model.scene)
+    return {
+      width: box.max.x - box.min.x,
+      height: box.max.y - box.min.y,
+      deep: box.max.z - box.min.z,
     }
   }
 }
