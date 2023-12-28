@@ -8,6 +8,7 @@ import { UnitControl } from '../controls/UnitControl'
 import { ModelControl } from '../controls/ModelControl'
 import { SwipeManager } from '../managers/SwipeManager'
 import { MovingTrackManager } from '../managers/MovingTrackManager'
+import { CollisionManager } from '../managers/CollisionManager'
 
 export class MainGameScene implements Experience {
   resources: Resource[] = [
@@ -41,6 +42,8 @@ export class MainGameScene implements Experience {
   private trackFloor!: ModelControl
   private swipeManager: SwipeManager = new SwipeManager()
   private movingTrackManager: MovingTrackManager
+  private collisionManager: CollisionManager = new CollisionManager()
+  private isCollision: boolean = false
 
   constructor(private engine: Engine) {
     this.movingTrackManager = new MovingTrackManager(this.engine)
@@ -77,6 +80,18 @@ export class MainGameScene implements Experience {
     if (localStorage.getItem('isEnableCameraRotation') === 'true') {
       this.engine.camera.enableOrbitRotation = true
     }
+    this.collisionManager.addObjects(
+      this.unit,
+      this.movingTrackManager.getTrackObjectArray()
+    )
+    this.collisionManager.onCollision(() => {
+      if (!this.isCollision) {
+        this.movingTrackManager.stopMoveTrack()
+        this.unit.fall()
+        this.isCollision = !this.isCollision
+        console.log('Collision')
+      }
+    })
   }
 
   resize() {}
@@ -143,6 +158,7 @@ export class MainGameScene implements Experience {
 
   update(delta: number) {
     this.unit.update(delta)
+    this.collisionManager.update()
     this.updateCamera()
   }
 
@@ -183,6 +199,7 @@ export class MainGameScene implements Experience {
         this.movingTrackManager.stopMoveTrack()
       })
       this.movingTrackManager.startMoveTrack()
+      this.isCollision = false
     })
     this.swipeManager.subscribeOnBottomSwipe(() => {
       this.unit.stop()
