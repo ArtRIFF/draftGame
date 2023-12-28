@@ -42,7 +42,7 @@ export class MovingTrackManager {
         const gsapAnimation = gsap
           .to(trackObject, {
             z: `+=${this.trackLength - trackObject.objectSize.deep}`,
-            duration: 3,
+            duration: 7,
             delay: index * 1.5,
             ease: 'power1.inOut',
             onRepeat: () => {
@@ -70,5 +70,9 @@ export class MovingTrackManager {
   setTrackParameters(startZ: number, trackLength: number) {
     this.startZ = startZ
     this.trackLength = trackLength
+  }
+
+  getTrackObjectArray(): ModelControl[] {
+    return this.trackObjectArray
   }
 }
