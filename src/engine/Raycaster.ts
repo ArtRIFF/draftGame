@@ -32,7 +32,10 @@ export class Raycaster extends EventEmitter {
   }
 
   public update() {
-    this.raycaster.setFromCamera(this.pointer, this.engine.camera.instance)
+    this.raycaster.setFromCamera(
+      this.pointer,
+      this.engine.perspectiveCamera.instance
+    )
   }
 
   public setPointer(x: number, y: number) {
@@ -41,7 +44,10 @@ export class Raycaster extends EventEmitter {
   }
 
   public getIntersections() {
-    return this.raycaster.intersectObjects(this.engine.scene.children, true)
+    return this.raycaster.intersectObjects(
+      this.engine.primaryScene.children,
+      true
+    )
   }
 
   private mouseEventToVector2(event: MouseEvent) {
