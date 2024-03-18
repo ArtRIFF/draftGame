@@ -8,8 +8,9 @@ export class DebugUI {
   private gui!: lilGui.GUI
   private stats!: Stats
   private debugObject = {
-    helpers: false,
+    gameHelpers: false,
     cameraRotation: false,
+    UIHelpers: false,
   }
 
   constructor() {
@@ -43,32 +44,36 @@ export class DebugUI {
     this.stats = new Stats()
     document.body.appendChild(this.stats.dom)
     this.gui = new lilGui.GUI()
-    if (localStorage.getItem('isHelpersVisible') === 'true') {
-      this.debugObject.helpers = true
+    if (localStorage.getItem('isGameHelpersVisible') === 'true') {
+      this.debugObject.gameHelpers = true
     }
     if (localStorage.getItem('isEnableCameraRotation') === 'true') {
       this.debugObject.cameraRotation = true
     }
-    this.addHelpersUI()
+    if (localStorage.getItem('isUIHelpersVisible') === 'true') {
+      this.debugObject.UIHelpers = true
+    }
+    this.addGameHelpers()
+    this.addUIHelpers()
     this.addUnitUI()
   }
 
-  private addHelpersUI() {
+  private addGameHelpers() {
     this.gui
       .add(
         {
-          helpers: this.debugObject.helpers,
+          gameHelpers: this.debugObject.gameHelpers,
         },
-        'helpers'
+        'gameHelpers'
       )
       .onChange(() => {
-        this.debugObject.helpers = !this.debugObject.helpers
-        if (this.debugObject.helpers) {
-          localStorage.setItem('isHelpersVisible', 'true')
-          toogleHelpers.emit('onShowHelpers')
+        this.debugObject.gameHelpers = !this.debugObject.gameHelpers
+        if (this.debugObject.gameHelpers) {
+          localStorage.setItem('isGameHelpersVisible', 'true')
+          toogleHelpers.emit('onShowGameHelpers')
         } else {
-          localStorage.setItem('isHelpersVisible', 'false')
-          toogleHelpers.emit('onHideHelpers')
+          localStorage.setItem('isGameHelpersVisible', 'false')
+          toogleHelpers.emit('onHideGameHelpers')
         }
       })
     this.gui
@@ -86,6 +91,26 @@ export class DebugUI {
         } else {
           localStorage.setItem('isEnableCameraRotation', 'false')
           toogleHelpers.emit('onSwitchCameraRotation', false)
+        }
+      })
+  }
+
+  private addUIHelpers(): void {
+    this.gui
+      .add(
+        {
+          UIHelpers: this.debugObject.UIHelpers,
+        },
+        'UIHelpers'
+      )
+      .onChange(() => {
+        this.debugObject.UIHelpers = !this.debugObject.UIHelpers
+        if (this.debugObject.UIHelpers) {
+          localStorage.setItem('isUIHelpersVisible', 'true')
+          toogleHelpers.emit('onShowUIHelpers')
+        } else {
+          localStorage.setItem('isUIHelpersVisible', 'false')
+          toogleHelpers.emit('onHideUIHelpers')
         }
       })
   }

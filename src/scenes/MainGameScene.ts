@@ -47,8 +47,8 @@ export class MainGameScene implements Experience {
 
   constructor(private engine: Engine) {
     this.movingTrackManager = new MovingTrackManager(this.engine)
-    toogleHelpers.on('onShowHelpers', () => this.showHelpers())
-    toogleHelpers.on('onHideHelpers', () => this.hideHelpers())
+    toogleHelpers.on('onShowGameHelpers', () => this.showHelpers())
+    toogleHelpers.on('onHideGameHelpers', () => this.hideHelpers())
     toogleHelpers.on('onSwitchCameraRotation', (switchValue: boolean) =>
       this.onSwitchRotationCamera(switchValue)
     )
@@ -74,11 +74,11 @@ export class MainGameScene implements Experience {
     this.movingTrackManager.addTrackObjects()
     this.setLight()
     this.hideHelpers()
-    if (localStorage.getItem('isHelpersVisible') === 'true') {
+    if (localStorage.getItem('isGameHelpersVisible') === 'true') {
       this.showHelpers()
     }
     if (localStorage.getItem('isEnableCameraRotation') === 'true') {
-      this.engine.camera.enableOrbitRotation = true
+      this.engine.perspectiveCamera.enableOrbitRotation = true
     }
     this.collisionManager.addObjects(
       this.unit,
@@ -97,16 +97,16 @@ export class MainGameScene implements Experience {
   resize() {}
 
   private setCamera() {
-    this.engine.camera.enableOrbitRotation = false
-    this.engine.camera.instance.position.set(0, 10, 30)
+    this.engine.perspectiveCamera.enableOrbitRotation = false
+    this.engine.perspectiveCamera.instance.position.set(0, 10, 30)
   }
 
   private onSwitchRotationCamera(switchValue: boolean) {
-    this.engine.camera.enableOrbitRotation = switchValue
+    this.engine.perspectiveCamera.enableOrbitRotation = switchValue
   }
 
   private setLight() {
-    this.engine.scene.add(new THREE.AmbientLight(0xffffff, 0.1))
+    this.engine.primaryScene.add(new THREE.AmbientLight(0xffffff, 0.1))
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
     directionalLight.position.set(15, 30, -40)
     directionalLight.castShadow = true
@@ -130,9 +130,9 @@ export class MainGameScene implements Experience {
     this.directLightHelper = new THREE.DirectionalLightHelper(directionalLight)
     this.pointLightHelper = new THREE.PointLightHelper(pointLight)
 
-    this.engine.scene.add(directionalLight, hemisphereLight, pointLight)
+    this.engine.primaryScene.add(directionalLight, hemisphereLight, pointLight)
 
-    this.engine.scene.add(
+    this.engine.primaryScene.add(
       this.hemisphereLightHelper,
       this.directLightHelper,
       this.pointLightHelper,
@@ -165,14 +165,14 @@ export class MainGameScene implements Experience {
   updateCamera() {}
 
   private setBackground() {
-    this.engine.scene.background = new THREE.Color(0xa0a0a0)
-    this.engine.scene.fog = new THREE.Fog(0xa0a0a0, 20, 70)
+    this.engine.primaryScene.background = new THREE.Color(0xa0a0a0)
+    this.engine.primaryScene.fog = new THREE.Fog(0xa0a0a0, 20, 70)
   }
 
   private addTrackFloor() {
     const trackFloorModel = this.engine.resources.getItem('TrackFloor')
     this.trackFloor = new ModelControl(trackFloorModel)
-    this.trackFloor.addToScene(this.engine.scene)
+    this.trackFloor.addToScene(this.engine.primaryScene)
     this.trackFloor.setPosition(0, 0, 30)
     this.trackFloor.setScale(1, 1, 3)
   }
@@ -182,7 +182,7 @@ export class MainGameScene implements Experience {
     this.unit = new UnitControl(brainManModel)
     this.unit.setPosition(0, 0.1, 20)
     this.unit.setRotation(0, Math.PI, 0)
-    this.unit.addToScene(this.engine.scene)
+    this.unit.addToScene(this.engine.primaryScene)
     this.unit.step = +this.trackFloor.objectSize.width.toFixed(0) / 3
     this.swipeManager.subscribeOnLeftSwipe(() => {
       this.unit.moveLeft().then(() => {

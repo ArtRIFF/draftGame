@@ -27,7 +27,7 @@ export class MovingTrackManager {
       obstacle.setRotation(0, Math.PI / 2)
       obstacle.setScale(3, 3, 3)
       this.addToStartPosition(obstacle)
-      obstacle.addToScene(this.engine.scene)
+      obstacle.addToScene(this.engine.primaryScene)
       this.trackObjectArray.push(obstacle)
     }
   }
