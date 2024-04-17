@@ -5,7 +5,8 @@
     <scripts>
       <script value="dev" />
     </scripts>
-    <node-interpreter value="project" />
+    <node-interpreter value="$PROJECT_DIR$/../../../../Program Files/nodejs/node" />
+    <package-manager value="C:\Program Files\nodejs\npm.cmd" />
     <envs />
     <method v="2" />
   </configuration>
