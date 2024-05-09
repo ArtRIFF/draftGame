@@ -12,23 +12,17 @@
     "preview": "vite preview",
     "cleanup": "node ./scripts/cleanup.js",
     "prepare": "husky install",
-    "preinstall": "git submodule update --init --recursive",
-    "lint": "eslint --fix --config config/.eslintrc.json --ignore-path config/.eslintignore"
+    "preinstall": "git submodule update --init --recursive"
   },
   "type": "module",
   "dependencies": {
+    "cannon-es": "^0.20.0",
     "gsap": "^3.12.2",
     "lil-gui": "^0.18.2",
     "three": "^0.157.0"
   },
   "devDependencies": {
     "@types/three": "^0.156.0",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "eslint": "^8.12.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-unused-imports": "^2.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.3.0",
     "prettier": "2.8.8",
@@ -39,8 +33,6 @@
   },
   "packageManager": "yarn@3.2.1",
   "lint-staged": {
-    "*.ts": [
-      "npm run lint"
-    ]
+    "**/*": "prettier --write --ignore-unknown"
   }
 }

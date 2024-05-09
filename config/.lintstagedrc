@@ -1,3 +1,0 @@
-{
-	"./**/*.ts": ["prettier --write --config ./config/.prettierrc --ignore-path ./.gitignore", "eslint --fix --quiet --config ./config/.eslintrc --ignore-path ./config/.eslintignore "]
-}
