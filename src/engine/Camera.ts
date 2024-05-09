@@ -1,51 +1,44 @@
-import { Engine } from "./Engine";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GameEntity } from "./GameEntity";
+import { Engine } from './Engine'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { GameEntity } from './GameEntity'
 
-export class Camera implements GameEntity
-{
-	public instance!: THREE.PerspectiveCamera;
-	private controls!: OrbitControls;
+export class Camera implements GameEntity {
+  public instance!: THREE.PerspectiveCamera
+  private controls!: OrbitControls
 
-	constructor(private engine: Engine)
-	{
-		this.initCamera();
-		this.initControls();
-	}
+  constructor(private engine: Engine) {
+    this.initCamera()
+    this.initControls()
+  }
 
-	private initCamera()
-	{
-		this.instance = new THREE.PerspectiveCamera(
-			75,
-			window.innerWidth / window.innerHeight,
-			0.1,
-			1000
-		);
-		this.instance.position.z = 5;
-		this.instance.position.y = 2;
-		this.engine.primaryScene.add(this.instance);
-	}
+  private initCamera() {
+    this.instance = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    )
+    this.instance.position.z = 5
+    this.instance.position.y = 2
+    this.engine.primaryScene.add(this.instance)
+  }
 
-	private initControls()
-	{
-		this.controls = new OrbitControls(this.instance, this.engine.canvas);
-		this.controls.update();
-	}
+  private initControls() {
+    this.controls = new OrbitControls(this.instance, this.engine.canvas)
+    this.controls.update()
+  }
 
-	set enableOrbitRotation(switchValue: boolean)
-	{
-		this.controls.enabled = switchValue;
-	}
+  set enableOrbitRotation(switchValue: boolean) {
+    this.controls.enabled = switchValue
+  }
 
-	resize()
-	{
-		this.instance.aspect = this.engine.sizes.aspectRatio;
-		this.instance.updateProjectionMatrix();
-	}
+  resize() {
+    this.instance.aspect = this.engine.sizes.aspectRatio
+    this.instance.updateProjectionMatrix()
+  }
 
-	update()
-	{
-		this.controls.update();
-	}
+  update() {
+    this.controls.update()
+  }
 }
