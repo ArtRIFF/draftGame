@@ -190,23 +190,36 @@ export class MainGameScene implements Experience {
       });
     });
     this.swipeManager.subscribeOnRightSwipe(() => {
-      this.unit.moveRight().then(() => {
+      this.unit.moveRight().then(async () => {
         this.unit.run();
       });
     });
-    this.swipeManager.subscribeOnTopSwipe(() => {
-      this.unit.run().then(() => {
-        this.movingTrackManager.stopMoveTrack();
-      });
 
-      this.movingTrackManager.startMoveTrack(7, 2).then(() => {
-        this.movingTrackManager.startMoveTrack(4, 2);
-      });
-
-      this.isCollision = false;
-    });
     this.swipeManager.subscribeOnBottomSwipe(() => {
       this.unit.stop();
     });
+    let isMove = false;
+    this.swipeManager.subscribeOnTopSwipe(async () => {
+      console.log('swipe start');
+      this.swipeManager.disableOnTopSwipe();
+      console.log('swipe disable');
+      if (!isMove) {
+        isMove = true;
+        this.unit.run();
+        console.log('start with 7 duration');
+        await this.movingTrackManager.startMoveTrack(7, 0);
+        console.log('start with 5 duration');
+        await this.movingTrackManager.startMoveTrack(5, 0);
+        console.log('start with 3 duration');
+        await this.movingTrackManager.startMoveTrack(3, 0);
+        this.swipeManager.ableOnTopSwipe();
+        console.log('swipe able');
+        console.log(this.swipeManager);
+        this.unit.stop();
+        isMove = false;
+      }
+    });
+
+    this.isCollision = false;
   }
 }

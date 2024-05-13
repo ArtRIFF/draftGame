@@ -13,8 +13,7 @@ export class MovingTrackManager {
   private gsapAnimationArray: GSAPTween[] = [];
   private trackLength: number = 0;
   private trackSpeedDuration: number = 7;
-  private completedMovePromise: ResolvablePromise<void> =
-    promiseHelper.getResolvablePromise<void>();
+  private completedMovePromise: ResolvablePromise<void> | null = null;
 
   constructor(private engine: Engine) {}
 
@@ -46,8 +45,9 @@ export class MovingTrackManager {
   async startMoveTrack(
     duration: number = this.trackSpeedDuration,
     repeatMove: number = 1
-  ) {
+  ): Promise<void> {
     this.gsapAnimationArray = [];
+    this.completedMovePromise = promiseHelper.getResolvablePromise<void>();
     this.trackObjectArray.forEach((trackObject, index) => {
       this.addToStartPosition(trackObject);
       const gsapAnimation = gsap.to(trackObject, {
@@ -58,7 +58,7 @@ export class MovingTrackManager {
         onComplete: () => {
           this.addToStartPosition(trackObject);
           if (index === this.objectAmount - 1) {
-            this.completedMovePromise.resolve();
+            this.completedMovePromise!.resolve();
           }
         },
         repeat: repeatMove,
@@ -66,7 +66,8 @@ export class MovingTrackManager {
       gsapAnimation.play();
       this.gsapAnimationArray.push(gsapAnimation);
     });
-    await this.completedMovePromise;
+
+    return await this.completedMovePromise;
   }
 
   private speedUpObstacles(duration: number) {
